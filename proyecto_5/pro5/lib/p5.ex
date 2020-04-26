@@ -41,9 +41,9 @@ defmodule P5 do
     else
       q = matrix_t(acc_q)
       r = acc_r
-      #IO.inspect("NO PARALLEL ANSWER")
-      #IO.inspect(q)
-      #IO.inspect(r)
+      IO.inspect("NO PARALLEL ANSWER")
+      IO.inspect(q)
+      IO.inspect(r)
     end
   end
 
@@ -111,11 +111,11 @@ defmodule P5 do
         end
       end
     else
-      #IO.inspect("PARALLEL ANSWE")
+      IO.inspect("PARALLEL ANSWER")
       q = matrix_t(acc_q)
       r = acc_r
-      #IO.inspect(q)
-      #IO.inspect(r)
+      IO.inspect(q)
+      IO.inspect(r)
     end
   end
 
