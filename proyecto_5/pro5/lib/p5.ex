@@ -13,6 +13,7 @@ defmodule P5 do
 
         if value != 0 do
           given_actual = calculate_givens_matrix(acc_r, i, j)
+
           givens_rotation(
             matrix,
             i + 1,
@@ -31,9 +32,9 @@ defmodule P5 do
     else
       q = matrix_t(acc_q)
       r = acc_r
-      IO.inspect("NO PARALLEL ANSWER")
-      IO.inspect(q)
-      IO.inspect(r))
+      #IO.inspect("NO PARALLEL ANSWER")
+      #IO.inspect(q)
+      #IO.inspect(r)
     end
   end
 
@@ -61,7 +62,7 @@ defmodule P5 do
 
   def parallel_givens_rotation(matrix) do
     dim = matrix[:rows]
-    parallel_givens_rotation(matrix, 1,1,2, 1, matrix, Matrex.eye(dim))
+    parallel_givens_rotation(matrix, 1, 1, 2, 1, matrix, Matrex.eye(dim))
   end
 
   def parallel_givens_rotation(matrix, first_col, stage, i, j, acc_r, acc_q) do
@@ -92,11 +93,11 @@ defmodule P5 do
         end
       end
     else
-      IO.inspect("RESPUESTA NO PARALELA")
+      #IO.inspect("PARALLEL ANSWE")
       q = matrix_t(acc_q)
       r = acc_r
-      IO.inspect(q)
-      IO.inspect(r)
+      #IO.inspect(q)
+      #IO.inspect(r)
     end
   end
 
@@ -122,5 +123,40 @@ defmodule P5 do
     current_g = Task.await(head)
     acc = multiply_matrix(current_g, acc)
     process_givens_matrix(tail, acc)
+  end
+end
+
+defmodule Time_iterations do
+
+  def start_test(max_iterations) do
+    calculate_time(5, max_iterations)
+  end
+
+  def calculate_time(matrix_size, max_iterations) when matrix_size <= max_iterations  do
+    random_matrix = Matrex.random(matrix_size)
+    sec_time = start_secuential(random_matrix)
+    par_time = start_parallel(random_matrix)
+
+    IO.puts("#{matrix_size},#{sec_time},#{par_time}")
+
+    calculate_time(matrix_size + 5, max_iterations)
+  end
+
+  def calculate_time(matrix_size, max_iterations) do
+      IO.inspect("Finished running")
+  end 
+
+  def start_secuential(random_matrix) do
+    start_time = :os.system_time(:millisecond)
+    P5.givens_rotation(random_matrix)
+    end_time = :os.system_time(:millisecond)
+    end_time - start_time
+  end
+
+  def start_parallel(random_matrix) do
+    start_time = :os.system_time(:millisecond)
+    P5.parallel_givens_rotation(random_matrix)
+    end_time = :os.system_time(:millisecond)
+    end_time - start_time
   end
 end
