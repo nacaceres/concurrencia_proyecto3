@@ -1,12 +1,21 @@
 defmodule P5 do
+  # Library used to manipulate matrices
   import Matrex
 
+  # This function is in charge of starting the secuential execution of the QR Factorization, it receives a square matrix.
+  # To create a new matrix: Matrex.random(<length of the diagonal>)
   def givens_rotation(matrix) do
+    # Get the dimension of the matrix
     dim = matrix[:rows]
+    # Matrex.eye(dim) creates an identity matrix of the dimension specified.
     givens_rotation(matrix, 2, 1, matrix, Matrex.eye(dim))
   end
 
+  #This function calculates the givens rotation for a given matrix and the coordinates of the first number to eliminate.
+  #In this case the coordinates are 2,1
   def givens_rotation(matrix, i, j, acc_r, acc_q) do
+    # In this part of the process we don't iterate over all of the matrix's values, just over the values on the lower triangular
+    # matrix without including the diagonal.
     if(j < matrix[:rows]) do
       if(i <= matrix[:rows]) do
         value = matrix[i][j]
@@ -38,6 +47,8 @@ defmodule P5 do
     end
   end
 
+  # This function calculates the givens matrix to eliminate the value on the coordinate i,j the function returns a matrix of the
+  # same dimentions of the initial one.
   def calculate_givens_matrix(matrix, i, j) do
     filas = matrix[:rows]
     top = matrix[j][j]
@@ -60,14 +71,21 @@ defmodule P5 do
     Matrex.dot(matrix_1, matrix_2)
   end
 
+  #---------------------------------------------------------------------------------------------------------------------
+
+  # This function starts the execution of the parallel implementation of the QR factorization.
   def parallel_givens_rotation(matrix) do
     dim = matrix[:rows]
     parallel_givens_rotation(matrix, 1, 1, 2, 1, matrix, Matrex.eye(dim))
   end
 
   def parallel_givens_rotation(matrix, first_col, stage, i, j, acc_r, acc_q) do
+    # Here we don't iterate over the same values than the secuential implementation, we use a more intelligent approach,
+    # we iterate depending on the type given to the value (this is further explained on the document), so we drastically 
+    # lowered the number of required iterations.
     if(j < matrix[:rows]) do
       if(i <= matrix[:rows]) do
+        # Here we create a list of the processes ids that will execute in a parallel way.
         processes_list = parallel_processes(acc_r, i, j, [])
         givens_matrices = process_givens_matrix(processes_list, Matrex.eye(matrix[:rows]))
         acc_r = multiply_matrix(givens_matrices, acc_r)
@@ -101,6 +119,9 @@ defmodule P5 do
     end
   end
 
+  # Based of the type given to the value, we create a list of process ids that will execute and calculate the givens matrices 
+  # corresponding to the values that can be eliminated in a parallel way. We used this approach to know the processes that we
+  # have to wait for the other calculations to work.
   def parallel_processes(matrix, i, j, processes_list) do
     if(j <= matrix[:rows] and i <= matrix[:rows] and j < i) do
       if(matrix[i][j] !== 0) do
@@ -114,10 +135,13 @@ defmodule P5 do
     end
   end
 
+  # Thins funtion returns the accumulated value when the list has been processed completely.
   def process_givens_matrix([], acc) do
     acc
   end
 
+  # This function is in charge of getting the results of the processes that executed in parallel and multiplying the matrices
+  # in the correct order.
   def process_givens_matrix(processes_list, acc) do
     [head | tail] = processes_list
     current_g = Task.await(head)
@@ -126,12 +150,15 @@ defmodule P5 do
   end
 end
 
+# This module was created for the comparison of both implementations
 defmodule Time_iterations do
 
+  # This function starts the execution. The parameter received tells the program where to stop running
   def start_test(max_iterations) do
     calculate_time(5, max_iterations)
   end
 
+  # This function creates a random matrix and passes it to both of the problem implementation.
   def calculate_time(matrix_size, max_iterations) when matrix_size <= max_iterations  do
     random_matrix = Matrex.random(matrix_size)
     sec_time = start_secuential(random_matrix)
@@ -145,6 +172,8 @@ defmodule Time_iterations do
   def calculate_time(matrix_size, max_iterations) do
       IO.inspect("Finished running")
   end 
+
+  # Both functions start executing the implementations and return the time taken to run each of them.
 
   def start_secuential(random_matrix) do
     start_time = :os.system_time(:millisecond)
